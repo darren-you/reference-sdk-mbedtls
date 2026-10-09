@@ -14,6 +14,4 @@ git clone --depth=1 https://github.com/pq-code-package/mlkem-native.git "$TMP"
 
 echo "Copying nix related files from $TMP ..."
 cp -R "$TMP/nix" "$ROOT"
-cp -R "$TMP/.github/actions/setup-nix" "$ROOT/.github/actions/"
-cp "$TMP/.github/workflows/nix.yml" "$ROOT/.github/workflows/nix.yml"
 cp "$TMP/flake.lock" "$ROOT"

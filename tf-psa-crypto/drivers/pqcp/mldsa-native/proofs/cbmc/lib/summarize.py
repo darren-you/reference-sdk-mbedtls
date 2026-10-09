@@ -185,14 +185,6 @@ def print_proof_results(out_file):
     print(output)
     sys.stdout.flush()
 
-    github_summary_file = os.getenv("GITHUB_STEP_SUMMARY")
-    if github_summary_file:
-        with open(github_summary_file, "a") as handle:
-            print(output, file=handle)
-            handle.flush()
-    else:
-        logging.warning("$GITHUB_STEP_SUMMARY not set, not writing summary file")
-
     msg = (
         "Click the 'Summary' button to view a Markdown table "
         "summarizing all proof results"

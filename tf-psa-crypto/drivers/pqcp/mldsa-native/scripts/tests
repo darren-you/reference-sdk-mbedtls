@@ -33,83 +33,8 @@ def dict2str(dict):
     return s
 
 
-def github_log(msg):
-    if os.environ.get("GITHUB_ENV") is None:
-        return
-    print(msg)
 
 
-def github_summary(title, test_label, results):
-    """Generate summary for GitHub CI"""
-    summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
-
-    res = list(results.values())
-
-    if isinstance(results[SCHEME.MLDSA44], str):
-        summaries = list(
-            map(
-                lambda s: f" {s} |",
-                reduce(
-                    lambda acc, s: [
-                        line1 + " | " + line2 for line1, line2 in zip(acc, s)
-                    ],
-                    [s.splitlines() for s in res],
-                ),
-            )
-        )
-        summaries = [f"| {test_label} |" + summaries[0]] + [
-            "| |" + x for x in summaries[1:]
-        ]
-    else:
-        summaries = [
-            reduce(
-                lambda acc, b: f"{acc} " + (":x: |" if b else ":white_check_mark: |"),
-                res,
-                f"| {test_label} |",
-            )
-        ]
-
-    def find_last_consecutive_match(l, s):
-        for i, v in enumerate(l[s + 1 :]):
-            if not v.startswith("|") or not v.endswith("|"):
-                return i + 1
-        return len(l)
-
-    def add_summaries(fn, title, summaries):
-        summary_title = "| Tests |"
-        summary_table_format = "| ----- |"
-        for s in SCHEME:
-            summary_title += f" {s} |"
-            summary_table_format += " ----- |"
-
-        with open(fn, "r") as f:
-            pre_summaries = [x for x in f.read().splitlines() if x]
-            if title in pre_summaries:
-                if summary_title not in pre_summaries:
-                    summaries = [summary_title, summary_table_format] + summaries
-                    pre_summaries = (
-                        pre_summaries[: pre_summaries.index(title) + 1]
-                        + summaries
-                        + pre_summaries[pre_summaries.index(title) + 1 :]
-                    )
-                else:
-                    i = find_last_consecutive_match(
-                        pre_summaries, pre_summaries.index(title)
-                    )
-                    pre_summaries = pre_summaries[:i] + summaries + pre_summaries[i:]
-                return ("w", pre_summaries)
-            else:
-                pre_summaries = [
-                    title,
-                    summary_title,
-                    summary_table_format,
-                ] + summaries
-                return ("a", pre_summaries)
-
-    if summary_file is not None:
-        (access_mode, summaries) = add_summaries(summary_file, title, summaries)
-        with open(summary_file, access_mode) as f:
-            print("\n".join(summaries), file=f)
 
 
 logging.basicConfig(
@@ -439,9 +364,6 @@ class Tests:
         else:
             opt_label = " no_opt"
 
-        github_log(
-            f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
-        )
 
         log = logger(test_type, "Compile", self.args.cross_prefix, opt)
 
@@ -505,7 +427,6 @@ class Tests:
             log.error(f"make failed: {p.returncode}")
             self.fail(f"Compilation for ({test_type}{opt_label})")
 
-        github_log("::endgroup::")
 
     def _run_scheme(
         self,
@@ -593,7 +514,6 @@ class Tests:
 
         k = "opt" if opt else "no_opt"
 
-        github_log(f"::group::run {self.compile_mode()} {k} {test_type.desc()}")
 
         results[k] = {}
         for scheme in SCHEME:
@@ -607,9 +527,7 @@ class Tests:
             results[k][scheme] = result
 
         title = "## " + (self.compile_mode()) + " " + (k.capitalize()) + " Tests"
-        github_summary(title, test_type.desc(), results[k])
 
-        github_log("::endgroup::")
 
         if suppress_output is True:
             # In this case, we only gather success/failure booleans

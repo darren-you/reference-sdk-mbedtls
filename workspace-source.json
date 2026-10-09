@@ -1,0 +1,7 @@
+{
+  "upstream_repository": "https://github.com/espressif/mbedtls",
+  "upstream_commit": "a2b32072ea898afc1ed5b6caf6931e36028c91d6",
+  "purpose": "ESP MQTT 固定 SDK 来源；只退出 GitHub Actions 定义、专属环境、徽章与生成接线，保留普通 SDK 源码和验证行为",
+  "source_owner": "darren-space",
+  "source_issue": "https://github.com/darren-you/darren-space/issues/64"
+}
